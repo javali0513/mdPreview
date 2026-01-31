@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown Preview</title>
+
+  <!-- Highlight.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" id="hljs-light">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-dark" disabled>
+
+  <!-- KaTeX -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+  <!-- Mermaid -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <span class="file-name" id="fileName">Loading...</span>
+    </div>
+    <div class="toolbar-right">
+      <button id="tocToggle" class="btn" title="切換目錄">📑 目錄</button>
+      <button id="themeToggle" class="btn" title="切換主題">🌙 暗色</button>
+      <button id="pdfExport" class="btn" title="匯出 PDF">📄 PDF</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <aside class="sidebar" id="sidebar">
+      <div id="toc"></div>
+    </aside>
+
+    <main class="content">
+      <article id="content" class="markdown-body">
+        <p>Loading...</p>
+      </article>
+    </main>
+  </div>
+
+  <div class="status" id="status">
+    <span class="status-dot"></span>
+    <span id="statusText">連線中...</span>
+  </div>
+
+  <script src="client.js"></script>
+</body>
+</html>

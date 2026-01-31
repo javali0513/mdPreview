@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown Editor</title>
+
+  <!-- Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com 'unsafe-inline';
+    style-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com 'unsafe-inline';
+    font-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com data:;
+    img-src 'self' data: blob: https:;
+    connect-src 'self';
+    frame-src 'none';
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+  ">
+
+  <!-- Highlight.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" id="hljs-light">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-dark" disabled>
+
+  <!-- KaTeX -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+  <!-- Mermaid -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+
+  <!-- Marked (Markdown parser) -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- Highlight.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+  <link rel="stylesheet" href="editor.css">
+</head>
+<body>
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <span class="app-title">✏️ Markdown Editor</span>
+    </div>
+    <div class="toolbar-right">
+      <div class="view-toggle" id="viewToggle">
+        <button class="view-btn" data-mode="editor" title="僅編輯器">✏️</button>
+        <button class="view-btn active" data-mode="split" title="分割檢視">▐▌</button>
+        <button class="view-btn" data-mode="preview" title="僅預覽">👁</button>
+      </div>
+      <button id="themeToggle" class="btn" title="切換主題">🌙 暗色</button>
+      <button id="downloadHtml" class="btn" title="下載 HTML">📄 下載 HTML</button>
+      <button id="downloadMd" class="btn" title="下載 MD">💾 下載 MD</button>
+      <button id="exportPdf" class="btn" title="匯出 PDF">📑 匯出 PDF</button>
+      <button id="clearBtn" class="btn" title="清除內容">🗑️ 清除</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="editor-pane" id="editorPane">
+      <div class="pane-header">
+        <span>Markdown</span>
+        <div class="pane-header-right">
+          <span class="char-count" id="charCount">0 字</span>
+        </div>
+      </div>
+      <textarea id="editor" placeholder="在此輸入或貼上 Markdown 內容...
+
+支援功能：
+- GitHub Flavored Markdown (GFM)
+- 程式碼語法高亮
+- 表格、任務清單
+- Mermaid 圖表 (```mermaid)
+- KaTeX 數學公式 ($...$, $$...$$)
+
+試試貼上一些 Markdown 內容！"></textarea>
+    </div>
+
+    <div class="divider" id="divider"></div>
+
+    <div class="preview-pane" id="previewPane">
+      <div class="pane-header">
+        <span>預覽</span>
+      </div>
+      <div id="preview" class="markdown-body"></div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    Copyright &copy; 2026 Java Li
+  </footer>
+
+  <script src="editor.js"></script>
+</body>
+</html>
