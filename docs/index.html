@@ -45,9 +45,15 @@
     </div>
     <div class="toolbar-right">
       <div class="view-toggle" id="viewToggle">
-        <button class="view-btn" data-mode="editor" title="僅編輯器">✏️</button>
-        <button class="view-btn active" data-mode="split" title="分割檢視">▐▌</button>
-        <button class="view-btn" data-mode="preview" title="僅預覽">👁</button>
+        <button class="view-btn" data-mode="editor" title="僅編輯器">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="2" width="12" height="12" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+        </button>
+        <button class="view-btn active" data-mode="split" title="分割檢視">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="2" width="5" height="12" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="9" y="2" width="5" height="12" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+        </button>
+        <button class="view-btn" data-mode="preview" title="僅預覽">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="2" width="12" height="12" rx="1" fill="currentColor"/></svg>
+        </button>
       </div>
       <button id="themeToggle" class="btn" title="切換主題">🌙 暗色</button>
       <button id="downloadHtml" class="btn" title="下載 HTML">📄 下載 HTML</button>

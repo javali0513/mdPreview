@@ -144,11 +144,17 @@ body {
   border: none;
   color: var(--blockquote-color);
   cursor: pointer;
-  font-size: 12px;
-  padding: 4px 8px;
+  padding: 4px 6px;
   border-radius: 4px;
   transition: all 0.2s;
   line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.view-btn svg {
+  display: block;
 }
 
 .view-btn:hover {
