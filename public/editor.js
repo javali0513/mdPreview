@@ -422,6 +422,10 @@ function setViewMode(mode) {
     container.classList.add('editor-only');
   } else if (mode === 'preview') {
     container.classList.add('preview-only');
+  } else if (mode === 'split') {
+    // 重置為預設 50/50 分割
+    editorPane.style.flex = '';
+    previewPane.style.flex = '';
   }
 
   // Update active button
