@@ -315,11 +315,15 @@ document.addEventListener('mousemove', (e) => {
 
   const container = document.querySelector('.container');
   const containerRect = container.getBoundingClientRect();
-  const percentage = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+  const dividerWidth = 4; // divider 寬度
+  const availableWidth = containerRect.width - dividerWidth;
+  const mouseX = e.clientX - containerRect.left;
+  const percentage = (mouseX / containerRect.width) * 100;
 
   if (percentage > 20 && percentage < 80) {
-    document.querySelector('.editor-pane').style.flex = `0 0 ${percentage}%`;
-    document.querySelector('.preview-pane').style.flex = `0 0 ${100 - percentage}%`;
+    // 使用 calc 保留 divider 空間
+    document.querySelector('.editor-pane').style.flex = `0 0 calc(${percentage}% - ${dividerWidth / 2}px)`;
+    document.querySelector('.preview-pane').style.flex = `0 0 calc(${100 - percentage}% - ${dividerWidth / 2}px)`;
   }
 });
 
@@ -418,6 +422,10 @@ function setViewMode(mode) {
     container.classList.add('editor-only');
   } else if (mode === 'preview') {
     container.classList.add('preview-only');
+  } else if (mode === 'split') {
+    // 重置為預設 50/50 分割
+    editorPane.style.flex = '';
+    previewPane.style.flex = '';
   }
 
   // Update active button

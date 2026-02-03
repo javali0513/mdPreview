@@ -41,16 +41,14 @@
 <body>
   <div class="toolbar">
     <div class="toolbar-left">
-      <span class="app-title">✏️ Markdown Editor</span>
+      <img src="爪black.png" alt="Logo" class="app-logo app-logo-light"><img src="爪white.png" alt="Logo" class="app-logo app-logo-dark"><span class="app-title">Markdown Editor</span>
     </div>
     <div class="toolbar-right">
       <div class="view-toggle" id="viewToggle">
         <button class="view-btn" data-mode="editor" title="僅編輯器">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-            <rect x="2" y="2" width="12" height="12" rx="1"/>
-            <line x1="4" y1="5" x2="12" y2="5"/>
-            <line x1="4" y1="8" x2="10" y2="8"/>
-            <line x1="4" y1="11" x2="8" y2="11"/>
+            <path d="M11.5 2.5l2 2-8 8H3.5v-2l8-8z"/>
+            <path d="M10 4l2 2"/>
           </svg>
         </button>
         <button class="view-btn active" data-mode="split" title="分割檢視">
@@ -61,10 +59,8 @@
         </button>
         <button class="view-btn" data-mode="preview" title="僅預覽">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-            <rect x="2" y="2" width="12" height="12" rx="1"/>
-            <rect x="4" y="4" width="8" height="2" rx="0.5" fill="currentColor"/>
-            <rect x="4" y="8" width="5" height="1.5" rx="0.5" fill="currentColor"/>
-            <rect x="4" y="11" width="6" height="1.5" rx="0.5" fill="currentColor"/>
+            <ellipse cx="8" cy="8" rx="6" ry="4"/>
+            <circle cx="8" cy="8" r="2"/>
           </svg>
         </button>
       </div>
