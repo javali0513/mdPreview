@@ -68,6 +68,8 @@ PDF (src/pdf.js) ─── puppeteer (PDF 匯出)
 - **主題切換**：亮色/暗色主題，自動切換 highlight.js 樣式
 - **拖曳調整**：可拖曳中間分隔線調整左右面板比例
 - **匯出功能**：下載 HTML、下載 MD、匯出 PDF（透過瀏覽器列印）
+- **Mermaid 自動偵測**：貼上未包裹的 Mermaid 語法會自動加上 ` ```mermaid ` 區塊渲染
+- **插入 Mermaid 模板**：工具列按鈕一鍵插入流程圖範本
 
 ## CSS 技巧
 
