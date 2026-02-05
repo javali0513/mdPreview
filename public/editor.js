@@ -7,6 +7,7 @@ const downloadHtml = document.getElementById('downloadHtml');
 const exportPdf = document.getElementById('exportPdf');
 const downloadMd = document.getElementById('downloadMd');
 const clearBtn = document.getElementById('clearBtn');
+const insertMermaid = document.getElementById('insertMermaid');
 const divider = document.getElementById('divider');
 const editorPane = document.getElementById('editorPane');
 const previewPane = document.getElementById('previewPane');
@@ -70,6 +71,64 @@ function escapeHtml(text) {
   return text.replace(/[&<>"']/g, m => map[m]);
 }
 
+// Auto-detect unwrapped Mermaid syntax
+const mermaidKeywords = /^(flowchart|graph|sequenceDiagram|classDiagram|stateDiagram|erDiagram|gantt|pie|gitgraph|mindmap|timeline|journey|quadrantChart|sankey|xychart|block)\b/;
+
+function autoWrapMermaid(content) {
+  const lines = content.split('\n');
+  const result = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const trimmed = lines[i].trim();
+    // 偵測是否為未包裹的 Mermaid 開頭（不在 code block 內）
+    if (mermaidKeywords.test(trimmed)) {
+      // 往前檢查是否已在 ```mermaid 區塊內
+      let alreadyWrapped = false;
+      for (let j = result.length - 1; j >= 0; j--) {
+        const prev = result[j].trim();
+        if (prev === '```mermaid' || prev.startsWith('```mermaid')) {
+          alreadyWrapped = true;
+          break;
+        }
+        if (prev === '```') break;
+        if (prev !== '') break;
+      }
+
+      if (!alreadyWrapped) {
+        result.push('```mermaid');
+        // 收集後續行直到遇到空行後的非 Mermaid 內容或其他 Markdown
+        while (i < lines.length) {
+          result.push(lines[i]);
+          i++;
+          // 如果下一行是空行，再往後看是否還有 Mermaid 相關內容
+          if (i < lines.length && lines[i].trim() === '') {
+            // 檢查空行之後是否有 subgraph、end、或連接線等 Mermaid 關鍵字
+            let nextNonEmpty = i + 1;
+            while (nextNonEmpty < lines.length && lines[nextNonEmpty].trim() === '') {
+              nextNonEmpty++;
+            }
+            if (nextNonEmpty < lines.length) {
+              const nextTrimmed = lines[nextNonEmpty].trim();
+              if (/^(subgraph|end|style|class|click|linkStyle|%%|[A-Z][\w]*[\s]*-->|[A-Z][\w]*[\s]*---|\s)/.test(nextTrimmed) ||
+                  nextTrimmed.startsWith('    ') ||
+                  /-->|---|\|/.test(nextTrimmed)) {
+                continue; // 還在 Mermaid 區塊內
+              }
+            }
+            break; // 結束 Mermaid 區塊
+          }
+        }
+        result.push('```');
+        continue;
+      }
+    }
+    result.push(lines[i]);
+    i++;
+  }
+  return result.join('\n');
+}
+
 // Process math expressions
 function processMath(content) {
   // Block math: $$...$$
@@ -109,8 +168,9 @@ function renderMarkdown() {
       return;
     }
 
-    // Process math before markdown
-    const processedContent = processMath(content);
+    // Auto-wrap Mermaid and process math before markdown
+    const wrappedContent = autoWrapMermaid(content);
+    const processedContent = processMath(wrappedContent);
 
     // Parse markdown
     const html = marked.parse(processedContent);
@@ -298,6 +358,19 @@ clearBtn.addEventListener('click', () => {
     return;
   }
   editor.value = '';
+  renderMarkdown();
+});
+
+// Insert Mermaid template
+insertMermaid.addEventListener('click', () => {
+  const template = '```mermaid\nflowchart TB\n    A["開始"] --> B{"判斷"}\n    B -->|"是"| C["處理"]\n    B -->|"否"| D["結束"]\n    C --> D\n```\n';
+  const pos = editor.selectionStart;
+  const before = editor.value.substring(0, pos);
+  const after = editor.value.substring(pos);
+  const prefix = pos > 0 && before[before.length - 1] !== '\n' ? '\n' : '';
+  editor.value = before + prefix + template + after;
+  editor.selectionStart = editor.selectionEnd = pos + prefix.length + template.length;
+  editor.focus();
   renderMarkdown();
 });
 
