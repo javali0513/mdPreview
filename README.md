@@ -1,4 +1,6 @@
-# Markdown Previewer (mdp)
+# mdPreview
+
+A markdown preview tool deployed on GitHub Pages for online document preview and sharing.
 
 一個功能完整的 Markdown 預覽工具，支援即時更新、Mermaid 圖表、KaTeX 數學公式及 PDF 匯出。
 
@@ -13,6 +15,7 @@
 - ✅ Mermaid 圖表渲染
 - ✅ KaTeX 數學公式
 - ✅ PDF 匯出
+- ✅ Mermaid 圖表下載（SVG/PNG）
 
 ## 安裝
 
