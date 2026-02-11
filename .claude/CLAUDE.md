@@ -70,6 +70,7 @@ PDF (src/pdf.js) ─── puppeteer (PDF 匯出)
 - **匯出功能**：下載 HTML、下載 MD、匯出 PDF（透過瀏覽器列印）
 - **Mermaid 自動偵測**：貼上未包裹的 Mermaid 語法會自動加上 ` ```mermaid ` 區塊渲染
 - **插入 Mermaid 模板**：工具列按鈕一鍵插入流程圖範本
+- **Mermaid 圖表下載**：hover 圖表時顯示下載按鈕，支援 SVG 和 PNG 格式（3x 高解析度）
 
 ## CSS 技巧
 

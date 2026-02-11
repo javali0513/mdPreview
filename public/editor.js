@@ -294,23 +294,37 @@ function downloadMermaidPng(svgElement) {
   const svgClone = svgElement.cloneNode(true);
   svgClone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
 
+  // 取得 SVG 實際渲染尺寸
+  const bbox = svgElement.getBoundingClientRect();
+  const width = bbox.width;
+  const height = bbox.height;
+
+  // 設定明確的寬高屬性
+  svgClone.setAttribute('width', width);
+  svgClone.setAttribute('height', height);
+
+  // 確保有 viewBox
+  if (!svgClone.getAttribute('viewBox')) {
+    svgClone.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  }
+
   const svgData = new XMLSerializer().serializeToString(svgClone);
   const svgBase64 = btoa(unescape(encodeURIComponent(svgData)));
   const imgSrc = `data:image/svg+xml;base64,${svgBase64}`;
 
   const img = new Image();
   img.onload = () => {
-    // 建立 canvas，使用 2x 解析度確保清晰
-    const scale = 2;
+    // 使用 3x 解析度確保高清
+    const scale = 3;
     const canvas = document.createElement('canvas');
-    canvas.width = img.width * scale;
-    canvas.height = img.height * scale;
+    canvas.width = width * scale;
+    canvas.height = height * scale;
 
     const ctx = canvas.getContext('2d');
     ctx.scale(scale, scale);
     ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, img.width, img.height);
-    ctx.drawImage(img, 0, 0);
+    ctx.fillRect(0, 0, width, height);
+    ctx.drawImage(img, 0, 0, width, height);
 
     // 下載 PNG
     canvas.toBlob((blob) => {
