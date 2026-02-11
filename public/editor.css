@@ -384,10 +384,48 @@ body {
 }
 
 /* Mermaid */
+.markdown-body .mermaid-wrapper {
+  position: relative;
+  margin: 16px 0;
+}
+
 .markdown-body .mermaid {
   background: var(--bg-color);
   text-align: center;
-  margin: 16px 0;
+}
+
+.markdown-body .mermaid-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.markdown-body .mermaid-wrapper:hover .mermaid-actions {
+  opacity: 1;
+}
+
+.markdown-body .mermaid-actions button {
+  background: var(--toolbar-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  color: var(--text-color);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.markdown-body .mermaid-actions button:hover {
+  background: var(--link-color);
+  color: white;
+  border-color: var(--link-color);
 }
 
 /* Math (KaTeX) */

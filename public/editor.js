@@ -216,16 +216,115 @@ async function renderMermaid() {
   });
 
   for (const el of mermaidEls) {
+    // 跳過已經包裝過的
+    if (el.parentElement?.classList.contains('mermaid-wrapper')) continue;
+
     const code = el.textContent;
     const id = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
 
     try {
       const { svg } = await mermaid.render(id, code);
+
+      // 建立 wrapper
+      const wrapper = document.createElement('div');
+      wrapper.className = 'mermaid-wrapper';
+
+      // 建立下載按鈕區
+      const actions = document.createElement('div');
+      actions.className = 'mermaid-actions';
+      actions.innerHTML = `
+        <button class="download-svg" title="下載 SVG">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          SVG
+        </button>
+        <button class="download-png" title="下載 PNG">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          PNG
+        </button>
+      `;
+
+      // 插入 wrapper
+      el.parentNode.insertBefore(wrapper, el);
+      wrapper.appendChild(el);
+      wrapper.appendChild(actions);
+
+      // 設定 SVG 內容
       el.innerHTML = svg;
+
+      // 綁定下載事件
+      const svgElement = el.querySelector('svg');
+      actions.querySelector('.download-svg').addEventListener('click', () => downloadMermaidSvg(svgElement));
+      actions.querySelector('.download-png').addEventListener('click', () => downloadMermaidPng(svgElement));
+
     } catch (e) {
       el.innerHTML = `<pre style="color: #dc3545;">Mermaid Error: ${e.message}</pre>`;
     }
   }
+}
+
+// 下載 Mermaid SVG
+function downloadMermaidSvg(svgElement) {
+  const svgClone = svgElement.cloneNode(true);
+  // 加入 xmlns 確保 SVG 可獨立使用
+  svgClone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+
+  const svgData = new XMLSerializer().serializeToString(svgClone);
+  const blob = new Blob([svgData], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `mermaid-${Date.now()}.svg`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// 下載 Mermaid PNG
+function downloadMermaidPng(svgElement) {
+  const svgClone = svgElement.cloneNode(true);
+  svgClone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+
+  const svgData = new XMLSerializer().serializeToString(svgClone);
+  const svgBase64 = btoa(unescape(encodeURIComponent(svgData)));
+  const imgSrc = `data:image/svg+xml;base64,${svgBase64}`;
+
+  const img = new Image();
+  img.onload = () => {
+    // 建立 canvas，使用 2x 解析度確保清晰
+    const scale = 2;
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width * scale;
+    canvas.height = img.height * scale;
+
+    const ctx = canvas.getContext('2d');
+    ctx.scale(scale, scale);
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, img.width, img.height);
+    ctx.drawImage(img, 0, 0);
+
+    // 下載 PNG
+    canvas.toBlob((blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `mermaid-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 'image/png');
+  };
+  img.src = imgSrc;
 }
 
 // Theme toggle
