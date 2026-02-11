@@ -7,6 +7,7 @@ const downloadHtml = document.getElementById('downloadHtml');
 const exportPdf = document.getElementById('exportPdf');
 const downloadMd = document.getElementById('downloadMd');
 const clearBtn = document.getElementById('clearBtn');
+const insertMermaid = document.getElementById('insertMermaid');
 const divider = document.getElementById('divider');
 const editorPane = document.getElementById('editorPane');
 const previewPane = document.getElementById('previewPane');
@@ -70,6 +71,64 @@ function escapeHtml(text) {
   return text.replace(/[&<>"']/g, m => map[m]);
 }
 
+// Auto-detect unwrapped Mermaid syntax
+const mermaidKeywords = /^(flowchart|graph|sequenceDiagram|classDiagram|stateDiagram|erDiagram|gantt|pie|gitgraph|mindmap|timeline|journey|quadrantChart|sankey|xychart|block)\b/;
+
+function autoWrapMermaid(content) {
+  const lines = content.split('\n');
+  const result = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const trimmed = lines[i].trim();
+    // 偵測是否為未包裹的 Mermaid 開頭（不在 code block 內）
+    if (mermaidKeywords.test(trimmed)) {
+      // 往前檢查是否已在 ```mermaid 區塊內
+      let alreadyWrapped = false;
+      for (let j = result.length - 1; j >= 0; j--) {
+        const prev = result[j].trim();
+        if (prev === '```mermaid' || prev.startsWith('```mermaid')) {
+          alreadyWrapped = true;
+          break;
+        }
+        if (prev === '```') break;
+        if (prev !== '') break;
+      }
+
+      if (!alreadyWrapped) {
+        result.push('```mermaid');
+        // 收集後續行直到遇到空行後的非 Mermaid 內容或其他 Markdown
+        while (i < lines.length) {
+          result.push(lines[i]);
+          i++;
+          // 如果下一行是空行，再往後看是否還有 Mermaid 相關內容
+          if (i < lines.length && lines[i].trim() === '') {
+            // 檢查空行之後是否有 subgraph、end、或連接線等 Mermaid 關鍵字
+            let nextNonEmpty = i + 1;
+            while (nextNonEmpty < lines.length && lines[nextNonEmpty].trim() === '') {
+              nextNonEmpty++;
+            }
+            if (nextNonEmpty < lines.length) {
+              const nextTrimmed = lines[nextNonEmpty].trim();
+              if (/^(subgraph|end|style|class|click|linkStyle|%%|[A-Z][\w]*[\s]*-->|[A-Z][\w]*[\s]*---|\s)/.test(nextTrimmed) ||
+                  nextTrimmed.startsWith('    ') ||
+                  /-->|---|\|/.test(nextTrimmed)) {
+                continue; // 還在 Mermaid 區塊內
+              }
+            }
+            break; // 結束 Mermaid 區塊
+          }
+        }
+        result.push('```');
+        continue;
+      }
+    }
+    result.push(lines[i]);
+    i++;
+  }
+  return result.join('\n');
+}
+
 // Process math expressions
 function processMath(content) {
   // Block math: $$...$$
@@ -109,8 +168,9 @@ function renderMarkdown() {
       return;
     }
 
-    // Process math before markdown
-    const processedContent = processMath(content);
+    // Auto-wrap Mermaid and process math before markdown
+    const wrappedContent = autoWrapMermaid(content);
+    const processedContent = processMath(wrappedContent);
 
     // Parse markdown
     const html = marked.parse(processedContent);
@@ -156,16 +216,129 @@ async function renderMermaid() {
   });
 
   for (const el of mermaidEls) {
+    // 跳過已經包裝過的
+    if (el.parentElement?.classList.contains('mermaid-wrapper')) continue;
+
     const code = el.textContent;
     const id = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
 
     try {
       const { svg } = await mermaid.render(id, code);
+
+      // 建立 wrapper
+      const wrapper = document.createElement('div');
+      wrapper.className = 'mermaid-wrapper';
+
+      // 建立下載按鈕區
+      const actions = document.createElement('div');
+      actions.className = 'mermaid-actions';
+      actions.innerHTML = `
+        <button class="download-svg" title="下載 SVG">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          SVG
+        </button>
+        <button class="download-png" title="下載 PNG">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          PNG
+        </button>
+      `;
+
+      // 插入 wrapper
+      el.parentNode.insertBefore(wrapper, el);
+      wrapper.appendChild(el);
+      wrapper.appendChild(actions);
+
+      // 設定 SVG 內容
       el.innerHTML = svg;
+
+      // 綁定下載事件
+      const svgElement = el.querySelector('svg');
+      actions.querySelector('.download-svg').addEventListener('click', () => downloadMermaidSvg(svgElement));
+      actions.querySelector('.download-png').addEventListener('click', () => downloadMermaidPng(svgElement));
+
     } catch (e) {
       el.innerHTML = `<pre style="color: #dc3545;">Mermaid Error: ${e.message}</pre>`;
     }
   }
+}
+
+// 下載 Mermaid SVG
+function downloadMermaidSvg(svgElement) {
+  const svgClone = svgElement.cloneNode(true);
+  // 加入 xmlns 確保 SVG 可獨立使用
+  svgClone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+
+  const svgData = new XMLSerializer().serializeToString(svgClone);
+  const blob = new Blob([svgData], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `mermaid-${Date.now()}.svg`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// 下載 Mermaid PNG
+function downloadMermaidPng(svgElement) {
+  const svgClone = svgElement.cloneNode(true);
+  svgClone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+
+  // 取得 SVG 實際渲染尺寸
+  const bbox = svgElement.getBoundingClientRect();
+  const width = bbox.width;
+  const height = bbox.height;
+
+  // 設定明確的寬高屬性
+  svgClone.setAttribute('width', width);
+  svgClone.setAttribute('height', height);
+
+  // 確保有 viewBox
+  if (!svgClone.getAttribute('viewBox')) {
+    svgClone.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  }
+
+  const svgData = new XMLSerializer().serializeToString(svgClone);
+  const svgBase64 = btoa(unescape(encodeURIComponent(svgData)));
+  const imgSrc = `data:image/svg+xml;base64,${svgBase64}`;
+
+  const img = new Image();
+  img.onload = () => {
+    // 使用 3x 解析度確保高清
+    const scale = 3;
+    const canvas = document.createElement('canvas');
+    canvas.width = width * scale;
+    canvas.height = height * scale;
+
+    const ctx = canvas.getContext('2d');
+    ctx.scale(scale, scale);
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, width, height);
+    ctx.drawImage(img, 0, 0, width, height);
+
+    // 下載 PNG
+    canvas.toBlob((blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `mermaid-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 'image/png');
+  };
+  img.src = imgSrc;
 }
 
 // Theme toggle
@@ -298,6 +471,19 @@ clearBtn.addEventListener('click', () => {
     return;
   }
   editor.value = '';
+  renderMarkdown();
+});
+
+// Insert Mermaid template
+insertMermaid.addEventListener('click', () => {
+  const template = '```mermaid\nflowchart TB\n    A["開始"] --> B{"判斷"}\n    B -->|"是"| C["處理"]\n    B -->|"否"| D["結束"]\n    C --> D\n```\n';
+  const pos = editor.selectionStart;
+  const before = editor.value.substring(0, pos);
+  const after = editor.value.substring(pos);
+  const prefix = pos > 0 && before[before.length - 1] !== '\n' ? '\n' : '';
+  editor.value = before + prefix + template + after;
+  editor.selectionStart = editor.selectionEnd = pos + prefix.length + template.length;
+  editor.focus();
   renderMarkdown();
 });
 
